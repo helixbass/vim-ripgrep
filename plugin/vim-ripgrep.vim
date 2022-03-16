@@ -152,4 +152,4 @@ endfun
 
 command! -nargs=* -complete=file Rgw :call s:RgWord(<q-args>)
 command! -nargs=* -complete=file Rg :call s:Rg(<q-args>)
-command! -complete=file RgRoot :call s:RgShowRoot()
+command! -nargs=* -complete=file RgRoot :call s:RgShowRoot()
