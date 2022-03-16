@@ -25,11 +25,15 @@ if !exists('g:rg_window_location')
 endif
 
 fun! g:RgVisual() range
-  call s:RgGrepContext(function('s:RgSearch'), '"' . s:RgGetVisualSelection() . '"')
+  call s:RgGrepContext(function('s:RgSearch'), '"' . s:RgGetVisualSelection() . '"', '')
 endfun
 
 fun! s:Rg(txt)
-  call s:RgGrepContext(function('s:RgSearch'), s:RgSearchTerm(a:txt))
+  call s:RgGrepContext(function('s:RgSearch'), s:RgSearchTerm(a:txt), '')
+endfun
+
+fun! s:RgWord(txt)
+  call s:RgGrepContext(function('s:RgSearch'), s:RgSearchTerm(a:txt), '-w ')
 endfun
 
 fun! s:RgGetVisualSelection()
@@ -53,7 +57,7 @@ fun! s:RgSearchTerm(txt)
   endif
 endfun
 
-fun! s:RgSearch(txt)
+fun! s:RgSearch(txt, additionalarg)
   let l:rgopts = ' '
   if &ignorecase == 1
     let l:rgopts = l:rgopts . '-i '
@@ -61,6 +65,7 @@ fun! s:RgSearch(txt)
   if &smartcase == 1
     let l:rgopts = l:rgopts . '-S '
   endif
+  let l:rgopts = l:rgopts . a:additionalarg
   silent! exe 'grep! ' . l:rgopts . a:txt
   if len(getqflist())
     exe g:rg_window_location 'copen'
@@ -75,7 +80,7 @@ fun! s:RgSearch(txt)
   endif
 endfun
 
-fun! s:RgGrepContext(search, txt)
+fun! s:RgGrepContext(search, txt, additionalarg)
   let l:grepprgb = &grepprg
   let l:grepformatb = &grepformat
   let &grepprg = g:rg_command
@@ -92,7 +97,7 @@ fun! s:RgGrepContext(search, txt)
   if exists('g:rg_derive_root')
     call s:RgPathContext(a:search, a:txt)
   else
-    call a:search(a:txt)
+    call a:search(a:txt, a:additionalarg)
   endif
 
   let &shellpipe=l:shellpipe_bak
@@ -145,5 +150,6 @@ fun! s:RgShowRoot()
   endif
 endfun
 
+command! -nargs=* -complete=file Rgw :call s:RgWord(<q-args>)
 command! -nargs=* -complete=file Rg :call s:Rg(<q-args>)
 command! -complete=file RgRoot :call s:RgShowRoot()
